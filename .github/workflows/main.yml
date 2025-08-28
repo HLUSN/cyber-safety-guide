@@ -1,40 +1,56 @@
-name: Node.js CI
+name: Cyber Safety CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  build_and_test:
+  build-test:
     runs-on: ubuntu-latest
-    
+
+    services:
+      mongo:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '16' 
+          node-version: "18"
 
-      # Install and test the backend
       - name: Install backend dependencies
-        run: npm install
-        working-directory: ./backend
+        run: |
+          cd backend
+          npm install
 
       - name: Run backend tests
-        run: npm test
-        working-directory: ./backend
+        run: |
+          cd backend
+          npm test
 
-      # Install and test the frontend
       - name: Install frontend dependencies
-        run: npm install
-        working-directory: ./frontend
-      
+        run: |
+          cd frontend
+          npm install
+
       - name: Run frontend tests
-        run: npm test
-        working-directory: ./frontend
+        run: |
+          cd frontend
+          npm test -- --watchAll=false
+
+      - name: Run BDD tests
+        run: |
+          cd tests/bdd
+          npx cucumber-js
+
+      - name: Run Selenium tests
+        run: |
+          cd tests/selenium
+          npx mocha login.test.js --timeout 10000
