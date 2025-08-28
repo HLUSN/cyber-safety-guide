@@ -17,6 +17,3 @@ frontend/package-lock.json
 
 # Backend dependencies
 backend/node_modules/
-
-# Hidden .git folders in submodules
-backend/.git/
